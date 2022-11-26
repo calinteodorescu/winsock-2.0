@@ -22,7 +22,7 @@
 #pragma comment(lib, "wsock32.lib")
 
 // Function prototype
-void StreamClient(char *szServer, short nPort);
+void StreamClient( const char *szServer, int nPort);
 
 // Helper macro for displaying errors
 #define PRINTERROR(s)	\
@@ -34,8 +34,8 @@ void main(int argc, char **argv)
 {
 	WORD wVersionRequested = MAKEWORD(1,1);
 	WSADATA wsaData;
-	int nRet;
-	short nPort;
+	int nRet  = 0;
+	int nPort = 0;
 
 	//
 	// Check for the host and port arguments
@@ -46,8 +46,10 @@ void main(int argc, char **argv)
 		return;
 	}
 
-	nPort = atoi(argv[2]);
+	const char* ip   = argv[ 1 ];
+	const char* port = argv[ 2 ];
 
+	nPort = atoi( port );
 
 	//
 	// Initialize WinSock and check the version
@@ -63,8 +65,7 @@ void main(int argc, char **argv)
 	//
 	// Go do the stuff a stream client does
 	//
-	StreamClient(argv[1], nPort);
-
+	StreamClient( ip, nPort );
 	
 	//
 	// Release WinSock
@@ -74,7 +75,7 @@ void main(int argc, char **argv)
 
 ////////////////////////////////////////////////////////////
 
-void StreamClient(char *szServer, short nPort)
+void StreamClient( const char *szServer, int nPort)
 {
 	printf("\nStream Client connecting to server: %s on port: %d",
 				szServer, nPort);

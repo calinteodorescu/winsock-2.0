@@ -24,7 +24,7 @@
 #pragma comment(lib, "wsock32.lib")
 
 // Function prototype
-void StreamServer(short nPort);
+void StreamServer( int nPort );
 
 // Helper macro for displaying errors
 #define PRINTERROR(s)	\
@@ -36,8 +36,8 @@ void main(int argc, char **argv)
 {
 	WORD wVersionRequested = MAKEWORD(1,1);
 	WSADATA wsaData;
-	int nRet;
-	short nPort;
+	int nRet  = 0;
+	int nPort = 0;
 
 	//
 	// Check for port argument
@@ -48,7 +48,9 @@ void main(int argc, char **argv)
 		return;
 	}
 
-	nPort = atoi(argv[1]);
+	const char* port = argv[ 1 ];
+
+	nPort = atoi( port );
 
 	//
 	// Initialize WinSock and check version
@@ -75,7 +77,7 @@ void main(int argc, char **argv)
 
 ////////////////////////////////////////////////////////////
 
-void StreamServer(short nPort)
+void StreamServer(int nPort)
 {
 	//
 	// Create a TCP/IP stream socket to "listen" with
