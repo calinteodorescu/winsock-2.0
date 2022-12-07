@@ -17,6 +17,8 @@ static UINT   s_guAppMsg;
 HANDLE s_ghExit;
 DWORD  s_gdwListenThread;
 
+static void sLogEvent(LPCSTR lpFormat, ...);
+
 ////////////////////////////////////////////////////////////
 
 BOOL StartHTTP(LPHTTPSERVINFO lpInfo)
@@ -128,8 +130,7 @@ BOOL StartHTTP(LPHTTPSERVINFO lpInfo)
                             &ThreadAddr);// Thread address
     if ( ! s_gdwListenThread)
     {
-        LogEvent( s_ghwnd, 
-                 "Could not create listening thread: %d",
+        sLogEvent( "Could not create listening thread: %d",
                  GetLastError());
         closesocket(s_listenSocket);
         return FALSE;
@@ -141,8 +142,7 @@ BOOL StartHTTP(LPHTTPSERVINFO lpInfo)
     gethostname(szBuf, sizeof(szBuf));
     dwAddrStrLen = sizeof(szAddress);
     GetLocalAddress(szAddress, &dwAddrStrLen);
-    LogEvent(s_ghwnd, 
-             "HTTP Server Started: %s [%s] on port %d",
+    sLogEvent("HTTP Server Started: %s [%s] on port %d",
              szBuf,
              szAddress,
              htons(saServer.sin_port));
@@ -171,11 +171,11 @@ void StopHTTP()
     //
     nRet = WaitForSingleObject((HANDLE)s_gdwListenThread, 10000);
     if (nRet == WAIT_TIMEOUT)
-        LogEvent(s_ghwnd, "TIMEOUT waiting for ListenThread");
+        sLogEvent("TIMEOUT waiting for ListenThread");
 
     CloseHandle((HANDLE)s_gdwListenThread);
     CloseHandle(s_ghExit);
-    LogEvent(s_ghwnd, "Server Stopped");
+    sLogEvent("Server Stopped");
 }
 
 ////////////////////////////////////////////////////////////
@@ -220,8 +220,7 @@ unsigned __stdcall ListenThread(void *pVoid)
         //
         // We have a connection
         // 
-        LogEvent(s_ghwnd, 
-                 "Connection accepted on socket:%d from:%s",
+        sLogEvent("Connection accepted on socket:%d from:%s",
                  socketClient,
                  inet_ntoa(SockAddr.sin_addr));
 
@@ -231,8 +230,7 @@ unsigned __stdcall ListenThread(void *pVoid)
         lpReq = malloc(sizeof(REQUEST));
         if (lpReq == NULL)
         {
-            LogEvent(s_ghwnd,
-                     "No memory for client request");
+            sLogEvent("No memory for client request");
             continue;
         }
         lpReq->hExit  = *pHandle;
@@ -255,7 +253,7 @@ unsigned __stdcall ListenThread(void *pVoid)
                             &ThreadAddr); // Thread address
         if (!dwClientThread)
         {
-            LogEvent(s_ghwnd, "Couldn't start client thread");
+            sLogEvent("Couldn't start client thread");
         }
         //
         // We won't be using client thread handles,
@@ -277,7 +275,7 @@ unsigned __stdcall ListenThread(void *pVoid)
     dwRet = WaitForSingleObject(hNoClients, 5000);
     if (dwRet == WAIT_TIMEOUT)
     {
-        LogEvent(s_ghwnd,
+        sLogEvent(
             "One or more client threads did not exit");
     }
     DeleteClientCount();
@@ -481,8 +479,7 @@ void CloseConnection(LPREQUEST lpReq)
     //
     // Log the event and close the socket
     //
-    LogEvent(s_ghwnd, 
-             "Closing socket: %d",
+    sLogEvent("Closing socket: %d",
              lpReq->Socket);
 
     nRet = closesocket(lpReq->Socket);
@@ -551,8 +548,7 @@ void SendFile(LPREQUEST lpReq)
     if (CloseHandle(lpReq->hFile))
         lpReq->hFile = INVALID_HANDLE_VALUE;
     else
-        LogEvent(s_ghwnd,
-                 "Error closing file: %d",
+        sLogEvent("Error closing file: %d",
                  GetLastError());
 }
 
@@ -724,7 +720,7 @@ void SendError(LPREQUEST lpReq, UINT uError)
 
 ////////////////////////////////////////////////////////////
 
-void LogEvent(HWND hwnd, LPCSTR lpFormat, ...)
+void sLogEvent(LPCSTR lpFormat, ...)
 {
     va_list Marker;
     char szBuf[256];
@@ -751,7 +747,7 @@ void LogWinSockError(HWND hwnd, LPCSTR lpText, int nErrorCode)
                nErrorCode,
                szBuf,
                sizeof(szBuf));
-    LogEvent(hwnd, "%s : %s", lpText, szBuf);
+    sLogEvent("%s : %s", lpText, szBuf);
 }
 
 ////////////////////////////////////////////////////////////
