@@ -4,55 +4,55 @@
 
 #include "httpMT.h"
 
-DWORD gdwClientCount = 0;
-CRITICAL_SECTION gcriticalClients;
-HANDLE ghNoClients;
+DWORD            s_gdwClientCount = 0;
+CRITICAL_SECTION s_gcriticalClients;
+HANDLE           s_ghNoClients;
 
 ////////////////////////////////////////////////////////////
 
 HANDLE InitClientCount(void)
 {
-	gdwClientCount = 0;
+    s_gdwClientCount = 0;
 
-	InitializeCriticalSection(&gcriticalClients);
+    InitializeCriticalSection( & s_gcriticalClients );
 
-	//
-	// Create the "no clients" signal event object
-	//
-	ghNoClients = CreateEvent(NULL,		// Security
-							 TRUE,		// Manual reset
-							 TRUE,		// Initial State
-							 NULL);		// Name
-	return ghNoClients;
+    //
+    // Create the "no clients" signal event object
+    //
+    s_ghNoClients = CreateEvent(NULL,        // Security
+                                TRUE,        // Manual reset
+                                TRUE,        // Initial State
+                                NULL);       // Name
+    return s_ghNoClients;
 }
 
 ////////////////////////////////////////////////////////////
 
 void IncrementClientCount(void)
 {
-	EnterCriticalSection(&gcriticalClients);
-	gdwClientCount++;
-	LeaveCriticalSection(&gcriticalClients);
-	ResetEvent(ghNoClients);
+    EnterCriticalSection( & s_gcriticalClients);
+    s_gdwClientCount++;
+    LeaveCriticalSection(&s_gcriticalClients);
+    ResetEvent( s_ghNoClients );
 }
 
 ////////////////////////////////////////////////////////////
 
 void DecrementClientCount(void)
 {
-	EnterCriticalSection(&gcriticalClients);
-	if (gdwClientCount > 0)
-		gdwClientCount--;
-	LeaveCriticalSection(&gcriticalClients);
-	if (gdwClientCount < 1)
-		SetEvent(ghNoClients);
+    EnterCriticalSection(&s_gcriticalClients);
+    if (s_gdwClientCount > 0)
+        s_gdwClientCount--;
+    LeaveCriticalSection(&s_gcriticalClients);
+    if (s_gdwClientCount < 1)
+        SetEvent(s_ghNoClients);
 }
 
 ////////////////////////////////////////////////////////////
 
 void DeleteClientCount(void)
 {
-	DeleteCriticalSection(&gcriticalClients);
-	CloseHandle(ghNoClients);
+    DeleteCriticalSection( & s_gcriticalClients );
+    CloseHandle( s_ghNoClients );
 }
 
