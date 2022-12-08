@@ -182,15 +182,15 @@ void StopHTTP()
 
 unsigned __stdcall ListenThread(void *pVoid)
 {
-    SOCKET        socketClient;
-    unsigned    ThreadAddr;
+    SOCKET       socketClient;
+    unsigned     ThreadAddr;
     DWORD        dwClientThread;
-    SOCKADDR_IN    SockAddr;
+    SOCKADDR_IN  SockAddr;
     LPREQUEST    lpReq;
-    int            nLen;
+    int          nLen;
     DWORD        dwRet;
-    HANDLE        hNoClients;
-    LPHANDLE    pHandle = (LPHANDLE)pVoid;
+    HANDLE       hNoClients;
+    LPHANDLE     pHandle = (LPHANDLE)pVoid;
 
     //
     // Initialize client thread count to 0
@@ -275,8 +275,7 @@ unsigned __stdcall ListenThread(void *pVoid)
     dwRet = WaitForSingleObject(hNoClients, 5000);
     if (dwRet == WAIT_TIMEOUT)
     {
-        sLogEvent(
-            "One or more client threads did not exit");
+        sLogEvent("One or more client threads did not exit");
     }
     DeleteClientCount();
     return 0;
